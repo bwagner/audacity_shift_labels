@@ -50,7 +50,6 @@ def shift_labels(
                 label = "\t".join(
                     parts[2:]
                 )  # Join everything after time columns as the label
-                # print(f"{start_time:.6f}\t{end_time:.6f}\t{label} {parts}")
                 yield f"{start_time:.6f}\t{end_time:.6f}\t{label}\n"
             else:
                 raise ValueError(f"Unexpected format in line: {line.strip()}")
@@ -67,14 +66,26 @@ if __name__ == "__main__":
             ..., help="File containing audacity labels or a column of numbers"
         ),
         offset: float = typer.Argument(..., help="Offset by which to shift the labels"),
+        inplace: bool = typer.Option(
+            False, "--inplace", "-i", help="Modify the input file in place"
+        ),
     ):
         """
         Command-line interface that reads an input file, shifts the labels by the given offset,
-        and prints the result to standard output.
+        and either modifies the file in place or prints the result to standard output.
         """
-        lines = read_file_as_generator(input_filename)
+        # list defies generator, but otherwise it doesn't work, because the file is
+        # truncated before generator had a chance to read:
+        lines = list(read_file_as_generator(input_filename))
+
         shifted_labels = shift_labels(lines, offset)
-        for label in shifted_labels:
-            print(label, end="")
+
+        if inplace:
+            with open(input_filename, "w") as file:
+                for label in shifted_labels:
+                    file.write(label)
+        else:
+            for label in shifted_labels:
+                print(label, end="")
 
     typer.run(main)
