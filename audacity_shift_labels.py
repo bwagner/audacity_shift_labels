@@ -1,5 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = []
+# ///
 
+import argparse
 from typing import Generator
 
 SECONDS_PER_MINUTE = 60
@@ -97,41 +101,49 @@ def shift_labels(
             yield f"Error processing line: {line.strip()} - {str(e)}\n"
 
 
-if __name__ == "__main__":
-    import typer
+def main(argv=None):
+    """
+    Command-line interface that reads an input file, shifts the labels by the given offset,
+    and either modifies the file in place or prints the result to standard output.
+    """
+    parser = argparse.ArgumentParser(description=main.__doc__.strip())
+    parser.add_argument(
+        "input_filename",
+        help="File containing audacity labels or a column of numbers",
+    )
+    parser.add_argument(
+        "offset",
+        help="Offset by which to shift the labels, as seconds (e.g. .3, -.3) "
+        "or HH:MM:SS (e.g. 1:52.216, 1:23:45.678)",
+    )
+    parser.add_argument(
+        "-i",
+        "--inplace",
+        action="store_true",
+        help="Modify the input file in place",
+    )
+    parser.add_argument(
+        "-c",
+        "--clamp",
+        action="store_true",
+        help="Clamp shifted times to a minimum of 0",
+    )
+    args = parser.parse_args(argv)
 
-    def main(
-        input_filename: str = typer.Argument(
-            ..., help="File containing audacity labels or a column of numbers"
-        ),
-        offset: str = typer.Argument(
-            ...,
-            help="Offset by which to shift the labels, as seconds (e.g. .3, -.3) "
-            "or HH:MM:SS (e.g. 1:52.216, 1:23:45.678)",
-        ),
-        inplace: bool = typer.Option(
-            False, "--inplace", "-i", help="Modify the input file in place"
-        ),
-        clamp: bool = typer.Option(
-            False, "--clamp", "-c", help="Clamp shifted times to a minimum of 0"
-        ),
-    ):
-        """
-        Command-line interface that reads an input file, shifts the labels by the given offset,
-        and either modifies the file in place or prints the result to standard output.
-        """
-        # list defies generator, but otherwise it doesn't work, because the file is
-        # truncated before generator had a chance to read:
-        lines = list(read_file_as_generator(input_filename))
+    # list defies generator, but otherwise it doesn't work, because the file is
+    # truncated before generator had a chance to read:
+    lines = list(read_file_as_generator(args.input_filename))
 
-        shifted_labels = shift_labels(lines, parse_time(offset), clamp=clamp)
+    shifted_labels = shift_labels(lines, parse_time(args.offset), clamp=args.clamp)
 
-        if inplace:
-            with open(input_filename, "w") as file:
-                for label in shifted_labels:
-                    file.write(label)
-        else:
+    if args.inplace:
+        with open(args.input_filename, "w") as file:
             for label in shifted_labels:
-                print(label, end="")
+                file.write(label)
+    else:
+        for label in shifted_labels:
+            print(label, end="")
 
-    typer.run(main)
+
+if __name__ == "__main__":
+    main()
