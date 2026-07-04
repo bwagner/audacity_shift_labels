@@ -1,9 +1,9 @@
-# test_shift_labels.py
+# test_audacity_shift_labels.py
 
 
 import pytest
 
-from shift_labels import parse_time, shift_labels
+from audacity_shift_labels import parse_time, shift_labels
 
 
 @pytest.mark.parametrize(

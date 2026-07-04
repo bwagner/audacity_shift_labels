@@ -1,8 +1,8 @@
-# shift_labels
+# audacity_shift_labels
 
 Shifts [Audacity](https://www.audacityteam.org/) labels by a (possibly negative) offset.
 ```console
- Usage: shift_labels.py [OPTIONS] INPUT_FILENAME OFFSET
+ Usage: audacity_shift_labels.py [OPTIONS] INPUT_FILENAME OFFSET
 
  Command-line interface that reads an input file, shifts the labels by the
  given offset, and either modifies the file in place or prints the result to
@@ -25,22 +25,22 @@ Shifts [Audacity](https://www.audacityteam.org/) labels by a (possibly negative)
 ```
 Example invocation (I want to shift labels by .3 seconds)
 ```console
-shift_labels.py labels.txt .3 > new_labels.txt
+audacity_shift_labels.py labels.txt .3 > new_labels.txt
 ```
 The offset may also be given as `HH:MM:SS`, where the seconds component is a
 decimal fraction:
 ```console
-shift_labels.py labels.txt 1:52.216 > new_labels.txt   # +112.216 seconds
+audacity_shift_labels.py labels.txt 1:52.216 > new_labels.txt   # +112.216 seconds
 ```
 Note: To protect a negative offset from being interpreted as an invalid option, you
 need to precede it by `--`, e.g.:
 ```console
-shift_labels.py labels.txt -- -.3 > new_labels.txt
+audacity_shift_labels.py labels.txt -- -.3 > new_labels.txt
 ```
 Pass `--clamp`/`-c` to keep shifted times from going below zero (any negative
 result is clamped to `0`):
 ```console
-shift_labels.py labels.txt --clamp -- -5 > new_labels.txt
+audacity_shift_labels.py labels.txt --clamp -- -5 > new_labels.txt
 ```
 
 ## See also
